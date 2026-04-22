@@ -1,0 +1,40 @@
+// Source of truth for the Prisma client. Kept deliberately close to the
+// sibling ledger-sqlite3 schema: same table and column names (accounts,
+// journal_entries, account_debit, account_credit), same shape.
+//
+// Note: the raw CREATE TABLE statements in src/db.js mirror this file and
+// are applied to in-memory SQLite at test time (see CLAUDE.md). If you
+// change one, change the other.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  name String @id
+  type String
+
+  debitEntries  JournalEntry[] @relation("DebitAccount")
+  creditEntries JournalEntry[] @relation("CreditAccount")
+
+  @@map("accounts")
+}
+
+model JournalEntry {
+  id            Int    @id @default(autoincrement())
+  description   String
+  accountDebit  String @map("account_debit")
+  accountCredit String @map("account_credit")
+  amount        Int
+  date          String
+
+  debit  Account @relation("DebitAccount",  fields: [accountDebit],  references: [name])
+  credit Account @relation("CreditAccount", fields: [accountCredit], references: [name])
+
+  @@map("journal_entries")
+}

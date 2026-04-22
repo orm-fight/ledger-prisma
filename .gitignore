@@ -1,0 +1,7 @@
+node_modules/
+*.log
+*.sqlite
+*.sqlite3
+.DS_Store
+.claude/
+prisma/memdb-*
