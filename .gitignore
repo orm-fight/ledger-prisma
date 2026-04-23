@@ -4,4 +4,3 @@ node_modules/
 *.sqlite3
 .DS_Store
 .claude/
-prisma/memdb-*

@@ -37,7 +37,7 @@ npm install
 npm test
 ```
 
-Tests run on an in-memory SQLite database — nothing is written to disk.
+Tests write each scratch database under the OS temp directory (`os.tmpdir()`) and clean up on teardown — nothing is written to the project directory.
 
 ## Units
 

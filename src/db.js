@@ -1,11 +1,10 @@
 'use strict';
 
-const { randomUUID } = require('node:crypto');
 const { PrismaClient } = require('@prisma/client');
 
 // Mirror of prisma/schema.prisma as raw SQL. Prisma has no built-in
-// "apply schema to this connection" call, so for in-memory tests we
-// run these statements ourselves. Keep in sync with schema.prisma.
+// "apply schema to this connection" call, so we run these statements
+// ourselves in init(). Keep in sync with schema.prisma.
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS accounts (
      name TEXT PRIMARY KEY,
@@ -22,8 +21,7 @@ const SCHEMA = [
 ];
 
 function open(url) {
-  const resolvedUrl = url ?? `file:memdb-${randomUUID()}?mode=memory&cache=shared`;
-  return new PrismaClient({ datasources: { db: { url: resolvedUrl } } });
+  return new PrismaClient({ datasources: { db: { url } } });
 }
 
 async function init(db) {

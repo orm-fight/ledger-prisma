@@ -24,9 +24,13 @@ If the user asks for audit logs, period rules, reversal, or SKR03 *in this repo*
 
 ## Schema lives in two places — on purpose
 
-`prisma/schema.prisma` is the idiomatic source of truth for the Prisma client. But Prisma has no built-in "apply schema to this connection" call, and tests run against an in-memory SQLite database. So `src/db.js` holds the equivalent schema as raw `CREATE TABLE` statements that `init(db)` applies via `$executeRawUnsafe`.
+`prisma/schema.prisma` is the idiomatic source of truth for the Prisma client. But Prisma has no built-in "apply schema to this connection" call, so `src/db.js` holds the equivalent schema as raw `CREATE TABLE` statements that `init(db)` applies via `$executeRawUnsafe`.
 
 When you change one, change the other. The two files are intentionally kept side-by-side rather than generated from one another — the table/column names are hand-written to match (`accounts`, `journal_entries`, `account_debit`, `account_credit`), and the mini size of the schema (two tables) makes manual sync trivial. Running `prisma migrate` to generate SQL was considered and rejected: it would pull migration files, `.env` handling, and a generate/deploy workflow into a repo whose whole point is readability.
+
+## Why not in-memory SQLite?
+
+Prisma's default SQLite driver doesn't honor SQLite's URI syntax — `file::memory:`, `?mode=memory`, `?cache=shared` all fall through as literal filenames. The two clean paths to true in-memory are (a) `@prisma/adapter-better-sqlite3` (adds a dependency that collides with the planned `ledger-better-sqlite3` sibling) or (b) `/dev/shm/` (Linux-only). Instead, `test/fixtures.js` writes each scratch DB into `os.tmpdir()` and deletes the directory on teardown. Cross-platform, zero extra deps, no artefacts in the project directory.
 
 ## Workflow
 
